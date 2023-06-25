@@ -71,6 +71,7 @@ export declare const InsightsError: z.ZodObject<{
     error: z.ZodString;
     stack: z.ZodString;
 }, "strip", z.ZodTypeAny, {
+    error: string;
     sessionID: string;
     url: string;
     timestamp: number;
@@ -78,9 +79,9 @@ export declare const InsightsError: z.ZodObject<{
     line: number;
     column: number;
     message: string;
-    error: string;
     stack: string;
 }, {
+    error: string;
     sessionID: string;
     url: string;
     timestamp: number;
@@ -88,7 +89,6 @@ export declare const InsightsError: z.ZodObject<{
     line: number;
     column: number;
     message: string;
-    error: string;
     stack: string;
 }>;
 export declare const InsightSymbol: z.ZodObject<{
