@@ -55,6 +55,10 @@ export interface InsightSymbol {
 }
 export interface InsightsError {
     sessionID: string;
+    /**
+     * Manifest Hash of the container.
+     */
+    manifestHash: string;
     timestamp: number;
     url: string;
     source: string;
@@ -65,6 +69,7 @@ export interface InsightsError {
     stack: string;
 }
 export declare const InsightsError: z.ZodObject<{
+    manifestHash: z.ZodString;
     sessionID: z.ZodString;
     url: z.ZodString;
     timestamp: z.ZodNumber;
@@ -76,6 +81,7 @@ export declare const InsightsError: z.ZodObject<{
     stack: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     error: string;
+    manifestHash: string;
     sessionID: string;
     url: string;
     timestamp: number;
@@ -86,6 +92,7 @@ export declare const InsightsError: z.ZodObject<{
     stack: string;
 }, {
     error: string;
+    manifestHash: string;
     sessionID: string;
     url: string;
     timestamp: number;
@@ -139,8 +146,8 @@ export declare const InsightsPayload: z.ZodObject<{
         interaction: boolean;
     }>, "many">;
 }, "strip", z.ZodTypeAny, {
-    sessionID: string;
     manifestHash: string;
+    sessionID: string;
     publicApiKey: string;
     previousSymbol: string | null;
     symbols: {
@@ -151,8 +158,8 @@ export declare const InsightsPayload: z.ZodObject<{
         interaction: boolean;
     }[];
 }, {
-    sessionID: string;
     manifestHash: string;
+    sessionID: string;
     publicApiKey: string;
     previousSymbol: string | null;
     symbols: {
