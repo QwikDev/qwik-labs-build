@@ -9,6 +9,10 @@ export interface InsightsPayload {
      */
     sessionID: string;
     /**
+     * Manifest Hash of the container.
+     */
+    manifestHash: string;
+    /**
      * API key of the application which we are trying to profile.
      *
      * This key can be used for sharding the data.
@@ -35,11 +39,11 @@ export interface InsightSymbol {
     /**
      * Time delta since last symbol. Can be used to stich symbol requests together
      */
-    timeDelta: number;
+    delay: number;
     /**
      * Number of ms between the time the symbol was requested and it was loaded.
      */
-    loadDelay: number;
+    latency: number;
     /**
      * Current pathname of location. Used to cluster by route.
      */
@@ -51,6 +55,10 @@ export interface InsightSymbol {
 }
 export interface InsightsError {
     sessionID: string;
+    /**
+     * Manifest Hash of the container.
+     */
+    manifestHash: string;
     timestamp: number;
     url: string;
     source: string;
@@ -61,6 +69,7 @@ export interface InsightsError {
     stack: string;
 }
 export declare const InsightsError: z.ZodObject<{
+    manifestHash: z.ZodString;
     sessionID: z.ZodString;
     url: z.ZodString;
     timestamp: z.ZodNumber;
@@ -72,6 +81,7 @@ export declare const InsightsError: z.ZodObject<{
     stack: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     error: string;
+    manifestHash: string;
     sessionID: string;
     url: string;
     timestamp: number;
@@ -82,6 +92,7 @@ export declare const InsightsError: z.ZodObject<{
     stack: string;
 }, {
     error: string;
+    manifestHash: string;
     sessionID: string;
     url: string;
     timestamp: number;
@@ -93,65 +104,68 @@ export declare const InsightsError: z.ZodObject<{
 }>;
 export declare const InsightSymbol: z.ZodObject<{
     symbol: z.ZodString;
-    timeDelta: z.ZodNumber;
-    loadDelay: z.ZodNumber;
+    delay: z.ZodNumber;
+    latency: z.ZodNumber;
     pathname: z.ZodString;
     interaction: z.ZodBoolean;
 }, "strip", z.ZodTypeAny, {
     symbol: string;
-    timeDelta: number;
-    loadDelay: number;
+    delay: number;
+    latency: number;
     pathname: string;
     interaction: boolean;
 }, {
     symbol: string;
-    timeDelta: number;
-    loadDelay: number;
+    delay: number;
+    latency: number;
     pathname: string;
     interaction: boolean;
 }>;
 export declare const InsightsPayload: z.ZodObject<{
     sessionID: z.ZodString;
+    manifestHash: z.ZodString;
     publicApiKey: z.ZodString;
     previousSymbol: z.ZodNullable<z.ZodString>;
     symbols: z.ZodArray<z.ZodObject<{
         symbol: z.ZodString;
-        timeDelta: z.ZodNumber;
-        loadDelay: z.ZodNumber;
+        delay: z.ZodNumber;
+        latency: z.ZodNumber;
         pathname: z.ZodString;
         interaction: z.ZodBoolean;
     }, "strip", z.ZodTypeAny, {
         symbol: string;
-        timeDelta: number;
-        loadDelay: number;
+        delay: number;
+        latency: number;
         pathname: string;
         interaction: boolean;
     }, {
         symbol: string;
-        timeDelta: number;
-        loadDelay: number;
+        delay: number;
+        latency: number;
         pathname: string;
         interaction: boolean;
     }>, "many">;
 }, "strip", z.ZodTypeAny, {
+    manifestHash: string;
     sessionID: string;
     publicApiKey: string;
     previousSymbol: string | null;
     symbols: {
         symbol: string;
-        timeDelta: number;
-        loadDelay: number;
+        delay: number;
+        latency: number;
         pathname: string;
         interaction: boolean;
     }[];
 }, {
+    manifestHash: string;
     sessionID: string;
     publicApiKey: string;
     previousSymbol: string | null;
     symbols: {
         symbol: string;
-        timeDelta: number;
-        loadDelay: number;
+        delay: number;
+        latency: number;
         pathname: string;
         interaction: boolean;
     }[];
