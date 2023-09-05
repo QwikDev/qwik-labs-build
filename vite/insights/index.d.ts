@@ -1,4 +1,5 @@
-import { type QwikVitePluginOptions } from '@builder.io/qwik/optimizer';
-export declare function insightsEntryStrategy({ publicApiKey, }: {
+import { PluginOption } from 'vite';
+export declare function qwikInsights(qwikInsightsOpts: {
     publicApiKey: string;
-}): Promise<QwikVitePluginOptions['entryStrategy']>;
+    baseUrl?: string;
+}): Promise<PluginOption>;

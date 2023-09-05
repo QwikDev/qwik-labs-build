@@ -37,6 +37,11 @@ export interface InsightSymbol {
      */
     symbol: string;
     /**
+     * Current route so we can have a better understanding of
+     * which symbols are needed for each route.
+     */
+    route: string;
+    /**
      * Time delta since last symbol. Can be used to stich symbol requests together
      */
     delay: number;
@@ -45,9 +50,9 @@ export interface InsightSymbol {
      */
     latency: number;
     /**
-     * Current pathname of location. Used to cluster by route.
+     * Number of ms between the q:route attribute change and the qsymbol event
      */
-    pathname: string;
+    timeline: number;
     /**
      * Was this symbol as a result of user interaction. User interactions represent roots for clouters.
      */
@@ -104,21 +109,24 @@ export declare const InsightsError: z.ZodObject<{
 }>;
 export declare const InsightSymbol: z.ZodObject<{
     symbol: z.ZodString;
+    route: z.ZodString;
     delay: z.ZodNumber;
     latency: z.ZodNumber;
-    pathname: z.ZodString;
+    timeline: z.ZodNumber;
     interaction: z.ZodBoolean;
 }, "strip", z.ZodTypeAny, {
     symbol: string;
+    route: string;
     delay: number;
     latency: number;
-    pathname: string;
+    timeline: number;
     interaction: boolean;
 }, {
     symbol: string;
+    route: string;
     delay: number;
     latency: number;
-    pathname: string;
+    timeline: number;
     interaction: boolean;
 }>;
 export declare const InsightsPayload: z.ZodObject<{
@@ -128,21 +136,24 @@ export declare const InsightsPayload: z.ZodObject<{
     previousSymbol: z.ZodNullable<z.ZodString>;
     symbols: z.ZodArray<z.ZodObject<{
         symbol: z.ZodString;
+        route: z.ZodString;
         delay: z.ZodNumber;
         latency: z.ZodNumber;
-        pathname: z.ZodString;
+        timeline: z.ZodNumber;
         interaction: z.ZodBoolean;
     }, "strip", z.ZodTypeAny, {
         symbol: string;
+        route: string;
         delay: number;
         latency: number;
-        pathname: string;
+        timeline: number;
         interaction: boolean;
     }, {
         symbol: string;
+        route: string;
         delay: number;
         latency: number;
-        pathname: string;
+        timeline: number;
         interaction: boolean;
     }>, "many">;
 }, "strip", z.ZodTypeAny, {
@@ -152,9 +163,10 @@ export declare const InsightsPayload: z.ZodObject<{
     previousSymbol: string | null;
     symbols: {
         symbol: string;
+        route: string;
         delay: number;
         latency: number;
-        pathname: string;
+        timeline: number;
         interaction: boolean;
     }[];
 }, {
@@ -164,9 +176,10 @@ export declare const InsightsPayload: z.ZodObject<{
     previousSymbol: string | null;
     symbols: {
         symbol: string;
+        route: string;
         delay: number;
         latency: number;
-        pathname: string;
+        timeline: number;
         interaction: boolean;
     }[];
 }>;
