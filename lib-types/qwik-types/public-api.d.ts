@@ -1,6 +1,4 @@
-/**
- * @public
- */
+/** @public */
 export declare const untypedAppUrl: (route: string, params?: Record<string, string>, paramsPrefix?: string) => string;
 /**
  * Creates a new object from `obj` by omitting a set of `keys`.
