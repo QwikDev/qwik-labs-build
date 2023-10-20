@@ -8,9 +8,8 @@ const logWarn = (message) => {
     console.warn('\x1b[33m%s\x1b[0m', `\n\nQWIK WARN: ${message}\n`);
 };
 async function qwikInsights(qwikInsightsOpts) {
-    const { publicApiKey, baseUrl = 'https://qwik-insights.builder.io' } = qwikInsightsOpts;
+    const { publicApiKey, baseUrl = 'https://qwik-insights.builder.io', outDir = 'dist', } = qwikInsightsOpts;
     let isProd = false;
-    const outDir = 'dist';
     const vitePlugin = {
         name: 'vite-plugin-qwik-insights',
         enforce: 'pre',
