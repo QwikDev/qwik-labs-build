@@ -1,47 +1,54 @@
-# Qwik Library ⚡️
+# Continuous Build Artifacts
 
-- [Qwik Docs](https://qwik.builder.io/)
-- [Discord](https://qwik.builder.io/chat)
-- [Qwik on GitHub](https://github.com/BuilderIO/qwik)
-- [@QwikDev](https://twitter.com/QwikDev)
-- [Vite](https://vitejs.dev/)
-- [Partytown](https://partytown.builder.io/)
-- [Mitosis](https://github.com/BuilderIO/mitosis)
-- [Builder.io](https://www.builder.io/)
+This repo contains build artifacts that are generated as part of the continues build pipeline. 
 
----
+Currently supported artifacts:
+- [`@builder.io/qwik`](https://github.com/BuilderIO/qwik-build)
+- [`@builder.io/qwik-city`](https://github.com/BuilderIO/qwik-city-build)
+- [`@builder.io/qwik-labs`](https://github.com/BuilderIO/qwik-labs-build)
 
-## Project Structure
+The build artifact is created if:
+- Code is merged to `main` branch
+- Code is merged to `build/*` branch
 
-Inside your project, you'll see the following directories and files:
 
-```
-├── public/
-│   └── ...
-└── src/
-    ├── components/
-    │   └── ...
-    └── index.ts
-```
+## How to use
 
-- `src/components`: Recommended directory for components.
+The build artifacts are useful if you want to:
+- Install an un-released change.
+- Bisect which specific commit caused a regression.
 
-- `index.ts`: The entry point of your component library, make sure all the public components are exported from this file.
 
-## Development
+## Install specific build artifact
+To install a specific build artifact change you `package.json` like so (not all lines may be needed):
 
-Development mode uses [Vite's development server](https://vitejs.dev/). For Qwik during development, the `dev` command will also server-side render (SSR) the output. The client-side development modules are loaded by the browser.
-
-```
-pnpm dev
+```json
+{
+  "dependencies": {
+    "@builder.io/qwik": "github:BuilderIO/qwik-build#SHA",
+    "@builder.io/qwik-city": "github:BuilderIO/qwik-city-build#SHA",
+    "@builder.io/qwik-labs": "github:BuilderIO/qwik-labs-build#SHA"
+  }
+}
 ```
 
-> Note: during dev mode, Vite will request many JS files, which does not represent a Qwik production build.
+Where `#SHA` is one of the following:
+- `#SHA` - Install a specific build SHA. You can get the SHA from:
+  - [`@builder.io/qwik`](https://github.com/BuilderIO/qwik-build/commits/) commits
+  - [`@builder.io/qwik-city`](https://github.com/BuilderIO/qwik-city-build/commits/) commits
+  - [`@builder.io/qwik-labs`](https://github.com/BuilderIO/qwik-labs-build/commits/) commits
+- `#build/name` (or `#main`) - Install a specific `build/*` (or `#main`) branch:
+  - [`@builder.io/qwik`](https://github.com/BuilderIO/qwik-build/branches/) branches
+  - [`@builder.io/qwik-city`](https://github.com/BuilderIO/qwik-city-build/branches/) branches
+  - [`@builder.io/qwik-labs`](https://github.com/BuilderIO/qwik-labs-build/branches/) branches
+   > NOTE: Package managers will treat any SHA in the lock file which is on the branch as valid, and so they will not auto upgrade to the latest.  For this reason this is not recommended.
 
-## Production
+## Bisect for regression
 
-The production build should generate the production build of your component library in (./lib) and the typescript type definitions in (./lib-types).
+You can bisect different commits to `main` to determine which specific change has cause the regression.
 
-```
-pnpm build
-```
+1. Install latest to get an upper mound
+2. Install oldest known good to get a lower bound
+3. Keep bisecting until you find a specific SHA where the code breaks. 
+
+When creating the issue please include which SHA has caused the regression.
