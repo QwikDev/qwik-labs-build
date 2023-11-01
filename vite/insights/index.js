@@ -5,7 +5,12 @@ const fs_1 = require("fs");
 const promises_1 = require("fs/promises");
 const node_path_1 = require("node:path");
 const logWarn = (message) => {
-    console.warn('\x1b[33m%s\x1b[0m', `\n\nQWIK WARN: ${message}\n`);
+    // eslint-disable-next-line no-console
+    console.warn('\x1b[33m%s\x1b[0m', `qwikInsight()[WARN]: ${message}`);
+};
+const log = (message) => {
+    // eslint-disable-next-line no-console
+    console.log('\x1b[35m%s\x1b[0m', `qwikInsight(): ${message}`);
 };
 async function qwikInsights(qwikInsightsOpts) {
     const { publicApiKey, baseUrl = 'https://qwik-insights.builder.io', outDir = 'dist', } = qwikInsightsOpts;
@@ -13,6 +18,7 @@ async function qwikInsights(qwikInsightsOpts) {
     const vitePlugin = {
         name: 'vite-plugin-qwik-insights',
         enforce: 'pre',
+        apply: 'build',
         async config(viteConfig) {
             isProd = viteConfig.mode !== 'ssr';
             if (isProd) {
@@ -28,7 +34,9 @@ async function qwikInsights(qwikInsightsOpts) {
                 if (!(0, fs_1.existsSync)((0, node_path_1.join)(process.cwd(), outDir))) {
                     (0, fs_1.mkdirSync)((0, node_path_1.join)(process.cwd(), outDir), { recursive: true });
                 }
-                await (0, promises_1.writeFile)((0, node_path_1.join)(process.cwd(), outDir, 'q-insights.json'), JSON.stringify(qManifest));
+                const cwdRelativePath = (0, node_path_1.join)(viteConfig.root || '.', outDir, 'q-insights.json');
+                log('Fetched latest Qwik Insight data into: ' + cwdRelativePath);
+                await (0, promises_1.writeFile)((0, node_path_1.join)(process.cwd(), cwdRelativePath), JSON.stringify(qManifest));
             }
         },
         closeBundle: async () => {
