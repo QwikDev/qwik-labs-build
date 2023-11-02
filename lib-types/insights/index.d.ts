@@ -1,14 +1,7 @@
 import { z } from 'zod';
 export interface InsightsPayload {
-    /**
-     * Unique ID per user session.
-     *
-     * Every page refresh constitutes a new SessionID. An SPA navigation will generate a new
-     * SessionID.
-     *
-     * NOTE: A user session implies same route URL.
-     */
-    sessionID: string;
+    /** Qwik version */
+    qVersion: string;
     /** Manifest Hash of the container. */
     manifestHash: string;
     /**
@@ -46,7 +39,6 @@ export interface InsightSymbol {
     interaction: boolean;
 }
 export interface InsightsError {
-    sessionID: string;
     /** Manifest Hash of the container. */
     manifestHash: string;
     timestamp: number;
@@ -60,7 +52,6 @@ export interface InsightsError {
 }
 export declare const InsightsError: z.ZodObject<{
     manifestHash: z.ZodString;
-    sessionID: z.ZodString;
     url: z.ZodString;
     timestamp: z.ZodNumber;
     source: z.ZodString;
@@ -72,7 +63,6 @@ export declare const InsightsError: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     error: string;
     manifestHash: string;
-    sessionID: string;
     url: string;
     timestamp: number;
     source: string;
@@ -83,7 +73,6 @@ export declare const InsightsError: z.ZodObject<{
 }, {
     error: string;
     manifestHash: string;
-    sessionID: string;
     url: string;
     timestamp: number;
     source: string;
@@ -115,7 +104,7 @@ export declare const InsightSymbol: z.ZodObject<{
     interaction: boolean;
 }>;
 export declare const InsightsPayload: z.ZodObject<{
-    sessionID: z.ZodString;
+    qVersion: z.ZodString;
     manifestHash: z.ZodString;
     publicApiKey: z.ZodString;
     previousSymbol: z.ZodNullable<z.ZodString>;
@@ -143,7 +132,7 @@ export declare const InsightsPayload: z.ZodObject<{
     }>, "many">;
 }, "strip", z.ZodTypeAny, {
     manifestHash: string;
-    sessionID: string;
+    qVersion: string;
     publicApiKey: string;
     previousSymbol: string | null;
     symbols: {
@@ -156,7 +145,7 @@ export declare const InsightsPayload: z.ZodObject<{
     }[];
 }, {
     manifestHash: string;
-    sessionID: string;
+    qVersion: string;
     publicApiKey: string;
     previousSymbol: string | null;
     symbols: {
