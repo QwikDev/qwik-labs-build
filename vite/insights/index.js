@@ -31,12 +31,13 @@ async function qwikInsights(qwikInsightsOpts) {
                 catch (e) {
                     logWarn('fail to fetch manifest from Insights DB');
                 }
-                if (!(0, fs_1.existsSync)((0, node_path_1.join)(process.cwd(), outDir))) {
-                    (0, fs_1.mkdirSync)((0, node_path_1.join)(process.cwd(), outDir), { recursive: true });
+                const cwdRelativePath = (0, node_path_1.join)(viteConfig.root || '.', outDir);
+                const cwdRelativePathJson = (0, node_path_1.join)(cwdRelativePath, 'q-insights.json');
+                if (!(0, fs_1.existsSync)((0, node_path_1.join)(process.cwd(), cwdRelativePath))) {
+                    (0, fs_1.mkdirSync)((0, node_path_1.join)(process.cwd(), cwdRelativePath), { recursive: true });
                 }
-                const cwdRelativePath = (0, node_path_1.join)(viteConfig.root || '.', outDir, 'q-insights.json');
-                log('Fetched latest Qwik Insight data into: ' + cwdRelativePath);
-                await (0, promises_1.writeFile)((0, node_path_1.join)(process.cwd(), cwdRelativePath), JSON.stringify(qManifest));
+                log('Fetched latest Qwik Insight data into: ' + cwdRelativePathJson);
+                await (0, promises_1.writeFile)((0, node_path_1.join)(process.cwd(), cwdRelativePathJson), JSON.stringify(qManifest));
             }
         },
         closeBundle: async () => {
