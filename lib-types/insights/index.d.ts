@@ -61,24 +61,24 @@ export declare const InsightsError: z.ZodObject<{
     error: z.ZodString;
     stack: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    error: string;
-    manifestHash: string;
-    url: string;
-    timestamp: number;
     source: string;
-    line: number;
-    column: number;
+    error: string;
     message: string;
+    url: string;
+    line: number;
+    manifestHash: string;
+    timestamp: number;
+    column: number;
     stack: string;
 }, {
-    error: string;
-    manifestHash: string;
-    url: string;
-    timestamp: number;
     source: string;
-    line: number;
-    column: number;
+    error: string;
     message: string;
+    url: string;
+    line: number;
+    manifestHash: string;
+    timestamp: number;
+    column: number;
     stack: string;
 }>;
 export declare const InsightSymbol: z.ZodObject<{
@@ -157,7 +157,7 @@ export declare const InsightsPayload: z.ZodObject<{
         interaction: boolean;
     }[];
 }>;
-export declare const Insights: import("@builder.io/qwik").Component<{
+export declare const Insights: import("@builder.io/qwik").Component<import("@builder.io/qwik").PropFunctionProps<{
     publicApiKey: string;
     postUrl?: string | undefined;
-}>;
+}>>;
