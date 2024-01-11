@@ -157,7 +157,7 @@ export declare const InsightsPayload: z.ZodObject<{
         interaction: boolean;
     }[];
 }>;
-export declare const Insights: import("@builder.io/qwik").Component<import("@builder.io/qwik").PropFunctionProps<{
+export declare const Insights: import("@builder.io/qwik").Component<{
     publicApiKey: string;
     postUrl?: string | undefined;
-}>>;
+}>;
