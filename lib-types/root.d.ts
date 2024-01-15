@@ -1,2 +1,2 @@
-declare const _default: () => import("@builder.io/qwik/jsx-runtime").JSX.Element;
+declare const _default: () => import("@builder.io/qwik").QwikJSX.Element;
 export default _default;
