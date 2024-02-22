@@ -87,7 +87,7 @@ function toParams(route) {
     const parts = route.split('/');
     parts.forEach((part) => {
         if (part.startsWith('[') && part.endsWith(']')) {
-            params.push(part.substring(part.startsWith('...') ? 4 : 1, part.length - 1));
+            params.push(part.substring(part.startsWith('[...') ? 4 : 1, part.length - 1));
         }
     });
     return params;
