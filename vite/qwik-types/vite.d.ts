@@ -1,2 +1,3 @@
-import { type Plugin } from 'vite';
+import { Plugin } from 'vite';
+
 export declare function qwikTypes(): Plugin;

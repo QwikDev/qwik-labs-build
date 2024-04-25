@@ -1,8 +1,10 @@
-import { existsSync, mkdirSync } from "fs";
-import { writeFile, readFile } from "fs/promises";
-import { join, sep } from "node:path";
-import { writeFile as writeFile$1, stat, readdir } from "node:fs/promises";
-import { format } from "prettier/standalone";
+"use strict";
+Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
+const fs = require("fs");
+const promises = require("fs/promises");
+const node_path = require("node:path");
+const promises$1 = require("node:fs/promises");
+const standalone = require("prettier/standalone");
 const logWarn = (message) => {
   console.warn("\x1B[33m%s\x1B[0m", `qwikInsight()[WARN]: ${message}`);
 };
@@ -31,19 +33,19 @@ async function qwikInsights(qwikInsightsOpts) {
         } catch (e) {
           logWarn("fail to fetch manifest from Insights DB");
         }
-        const cwdRelativePath = join(viteConfig.root || ".", outDir);
-        const cwdRelativePathJson = join(cwdRelativePath, "q-insights.json");
-        if (!existsSync(join(process.cwd(), cwdRelativePath))) {
-          mkdirSync(join(process.cwd(), cwdRelativePath), { recursive: true });
+        const cwdRelativePath = node_path.join(viteConfig.root || ".", outDir);
+        const cwdRelativePathJson = node_path.join(cwdRelativePath, "q-insights.json");
+        if (!fs.existsSync(node_path.join(process.cwd(), cwdRelativePath))) {
+          fs.mkdirSync(node_path.join(process.cwd(), cwdRelativePath), { recursive: true });
         }
         log("Fetched latest Qwik Insight data into: " + cwdRelativePathJson);
-        await writeFile(join(process.cwd(), cwdRelativePathJson), JSON.stringify(qManifest));
+        await promises.writeFile(node_path.join(process.cwd(), cwdRelativePathJson), JSON.stringify(qManifest));
       }
     },
     closeBundle: async () => {
-      const path = join(process.cwd(), outDir, "q-manifest.json");
-      if (isProd && existsSync(path)) {
-        const qManifest = await readFile(path, "utf-8");
+      const path = node_path.join(process.cwd(), outDir, "q-manifest.json");
+      if (isProd && fs.existsSync(path)) {
+        const qManifest = await promises.readFile(path, "utf-8");
         try {
           await fetch(`${baseUrl}/api/v1/${publicApiKey}/post/manifest`, {
             method: "post",
@@ -63,7 +65,7 @@ async function prettify(template, ...substitutions) {
     source += template[i] + (i < substitutions.length ? String(substitutions[i]) : "");
   }
   try {
-    source = await format(source, {
+    source = await standalone.format(source, {
       parser: "typescript",
       plugins: [
         // To support running in browsers
@@ -122,23 +124,23 @@ export function AppLink(props: AppLinkProps & QwikIntrinsicElements['a']) {
   );
 }
 `;
-  const file = join(srcDir, "routes.config.tsx");
+  const file = node_path.join(srcDir, "routes.config.tsx");
   const fileExists = await exists(file);
   console.log("File exists", file, fileExists);
   if (!fileExists) {
-    writeFile$1(file, CONFIG_FILE);
+    promises$1.writeFile(file, CONFIG_FILE);
   }
 }
 async function exists(file) {
   try {
-    return (await stat(file)).isFile();
+    return (await promises$1.stat(file)).isFile();
   } catch (e) {
     return false;
   }
 }
 async function generateSrcRoutesGen(srcDir, routes) {
-  await writeFile$1(
-    join(srcDir, "routes.gen.d.ts"),
+  await promises$1.writeFile(
+    node_path.join(srcDir, "routes.gen.d.ts"),
     await prettify`
 ${GENERATED_HEADER}
 
@@ -181,8 +183,8 @@ function s(text) {
   return JSON.stringify(text);
 }
 function qwikTypes() {
-  const srcFolder = join(process.cwd(), "src");
-  const routesFolder = join(srcFolder, "routes");
+  const srcFolder = node_path.join(process.cwd(), "src");
+  const routesFolder = node_path.join(srcFolder, "routes");
   return {
     name: "Qwik Type Generator",
     async buildStart() {
@@ -198,12 +200,12 @@ async function regenerateRoutes(srcDir, routesDir) {
   routes.sort();
   generateRouteTypes(srcDir, routesDir, routes);
   const seenRoutes = /* @__PURE__ */ new Set();
-  routes.forEach((route) => seenRoutes.add(join(routesDir, route, `index.tsx`)));
+  routes.forEach((route) => seenRoutes.add(node_path.join(routesDir, route, `index.tsx`)));
   return seenRoutes;
 }
 async function assertDirectoryExists(directoryPath) {
   try {
-    const stats = await stat(directoryPath);
+    const stats = await promises$1.stat(directoryPath);
     if (!stats.isDirectory()) {
       throw new Error(`${directoryPath} is not a directory.`);
     }
@@ -212,7 +214,7 @@ async function assertDirectoryExists(directoryPath) {
   }
 }
 function getRouteDirectory(id) {
-  const lastSlash = id.lastIndexOf(sep);
+  const lastSlash = id.lastIndexOf(node_path.sep);
   const filename = id.substring(lastSlash + 1);
   if (filename.endsWith("index.md") || filename.endsWith("index.mdx") || filename.endsWith("index.js") || filename.endsWith("index.jsx") || filename.endsWith("index.ts") || filename.endsWith("index.tsx")) {
     return id.substring(0, lastSlash + 1);
@@ -220,19 +222,17 @@ function getRouteDirectory(id) {
   return null;
 }
 async function collectRoutes(base, directoryPath, routes) {
-  const files = await readdir(directoryPath);
+  const files = await promises$1.readdir(directoryPath);
   for (let i = 0; i < files.length; i++) {
-    const filePath = join(directoryPath, files[i]);
-    const fileStat = await stat(filePath);
+    const filePath = node_path.join(directoryPath, files[i]);
+    const fileStat = await promises$1.stat(filePath);
     let route;
     if (fileStat.isDirectory()) {
       await collectRoutes(base, filePath, routes);
     } else if ((route = getRouteDirectory(filePath)) !== null) {
-      routes.push(route.substring(base.length).replaceAll(sep, "/"));
+      routes.push(route.substring(base.length).replaceAll(node_path.sep, "/"));
     }
   }
 }
-export {
-  qwikInsights,
-  qwikTypes
-};
+exports.qwikInsights = qwikInsights;
+exports.qwikTypes = qwikTypes;

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+
 export interface InsightsPayload {
     /** Qwik version */
     qVersion: string;
@@ -61,24 +62,24 @@ export declare const InsightsError: z.ZodObject<{
     error: z.ZodString;
     stack: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    source: string;
-    error: string;
-    message: string;
-    url: string;
-    line: number;
     manifestHash: string;
+    url: string;
     timestamp: number;
+    source: string;
+    line: number;
     column: number;
+    message: string;
+    error: string;
     stack: string;
 }, {
-    source: string;
-    error: string;
-    message: string;
-    url: string;
-    line: number;
     manifestHash: string;
+    url: string;
     timestamp: number;
+    source: string;
+    line: number;
     column: number;
+    message: string;
+    error: string;
     stack: string;
 }>;
 export declare const InsightSymbol: z.ZodObject<{
@@ -157,7 +158,7 @@ export declare const InsightsPayload: z.ZodObject<{
         interaction: boolean;
     }[];
 }>;
-export declare const Insights: import("@builder.io/qwik").Component<{
+export declare const Insights: import('@builder.io/qwik').Component<{
     publicApiKey: string;
     postUrl?: string | undefined;
 }>;
