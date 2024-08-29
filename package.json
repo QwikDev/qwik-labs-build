@@ -11,7 +11,7 @@
     "eslint": "^8.57.0",
     "eslint-plugin-qwik": "2.0.0-0",
     "np": "10.0.1",
-    "prettier": "3.3.3",
+    "prettier": "*",
     "typescript": "5.4.5",
     "undici": "*",
     "vite": "5.3.5"
