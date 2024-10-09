@@ -18,7 +18,7 @@ export interface InsightsPayload {
      * is useful for server clustering. Sending previous symbol name allows the server to stitch the
      * symbol list together.
      */
-    previousSymbol: string | null;
+    previousSymbol?: string | null;
     /** List of symbols which have been received since last update. */
     symbols: InsightSymbol[];
 }
@@ -108,7 +108,7 @@ export declare const InsightsPayload: z.ZodObject<{
     qVersion: z.ZodString;
     manifestHash: z.ZodString;
     publicApiKey: z.ZodString;
-    previousSymbol: z.ZodNullable<z.ZodString>;
+    previousSymbol: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     symbols: z.ZodArray<z.ZodObject<{
         symbol: z.ZodString;
         route: z.ZodString;
@@ -135,7 +135,6 @@ export declare const InsightsPayload: z.ZodObject<{
     manifestHash: string;
     qVersion: string;
     publicApiKey: string;
-    previousSymbol: string | null;
     symbols: {
         symbol: string;
         route: string;
@@ -144,11 +143,11 @@ export declare const InsightsPayload: z.ZodObject<{
         timeline: number;
         interaction: boolean;
     }[];
+    previousSymbol?: string | null | undefined;
 }, {
     manifestHash: string;
     qVersion: string;
     publicApiKey: string;
-    previousSymbol: string | null;
     symbols: {
         symbol: string;
         route: string;
@@ -157,6 +156,7 @@ export declare const InsightsPayload: z.ZodObject<{
         timeline: number;
         interaction: boolean;
     }[];
+    previousSymbol?: string | null | undefined;
 }>;
 export declare const Insights: import('@builder.io/qwik').Component<{
     publicApiKey: string;
