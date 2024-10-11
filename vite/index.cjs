@@ -3,20 +3,17 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
 const fs = require("fs");
 const promises = require("fs/promises");
 const node_path = require("node:path");
+const path = require("path");
 const promises$1 = require("node:fs/promises");
 const standalone = require("prettier/standalone");
-const logWarn = (message) => {
-  console.warn("\x1B[33m%s\x1B[0m", `qwikInsight()[WARN]: ${message}`);
+const logWarn = (message, ...rest) => {
+  console.warn("\x1B[33m%s\x1B[0m", `qwikInsight()[WARN]: ${message}`, ...rest);
 };
 const log = (message) => {
   console.log("\x1B[35m%s\x1B[0m", `qwikInsight(): ${message}`);
 };
 async function qwikInsights(qwikInsightsOpts) {
-  const {
-    publicApiKey,
-    baseUrl = "https://qwik-insights.builder.io",
-    outDir = "dist"
-  } = qwikInsightsOpts;
+  const { publicApiKey, baseUrl = "https://insights.qwik.dev", outDir = "" } = qwikInsightsOpts;
   let isProd = false;
   const vitePlugin = {
     name: "vite-plugin-qwik-insights",
@@ -30,29 +27,27 @@ async function qwikInsights(qwikInsightsOpts) {
           const response = await fetch(`${baseUrl}/api/v1/${publicApiKey}/bundles/strategy/`);
           const strategy = await response.json();
           Object.assign(qManifest, strategy);
+          const path$1 = path.resolve(viteConfig.root || ".", outDir);
+          const pathJson = node_path.join(path$1, "q-insights.json");
+          fs.mkdirSync(path$1, { recursive: true });
+          log("Fetched latest Qwik Insight data into: " + pathJson);
+          await promises.writeFile(pathJson, JSON.stringify(qManifest));
         } catch (e) {
-          logWarn("fail to fetch manifest from Insights DB");
+          logWarn("Failed to fetch manifest from Insights DB", e);
         }
-        const cwdRelativePath = node_path.join(viteConfig.root || ".", outDir);
-        const cwdRelativePathJson = node_path.join(cwdRelativePath, "q-insights.json");
-        if (!fs.existsSync(node_path.join(process.cwd(), cwdRelativePath))) {
-          fs.mkdirSync(node_path.join(process.cwd(), cwdRelativePath), { recursive: true });
-        }
-        log("Fetched latest Qwik Insight data into: " + cwdRelativePathJson);
-        await promises.writeFile(node_path.join(process.cwd(), cwdRelativePathJson), JSON.stringify(qManifest));
       }
     },
     closeBundle: async () => {
-      const path = node_path.join(process.cwd(), outDir, "q-manifest.json");
-      if (isProd && fs.existsSync(path)) {
-        const qManifest = await promises.readFile(path, "utf-8");
+      const path$1 = path.resolve(outDir, "q-manifest.json");
+      if (isProd && fs.existsSync(path$1)) {
+        const qManifest = await promises.readFile(path$1, "utf-8");
         try {
           await fetch(`${baseUrl}/api/v1/${publicApiKey}/post/manifest`, {
             method: "post",
             body: qManifest
           });
         } catch (e) {
-          logWarn("fail to post manifest to Insights DB");
+          logWarn("Failed to post manifest to Insights DB", e);
         }
       }
     }

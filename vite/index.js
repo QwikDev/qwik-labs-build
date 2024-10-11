@@ -1,20 +1,17 @@
-import { existsSync, mkdirSync } from "fs";
+import { mkdirSync, existsSync } from "fs";
 import { writeFile, readFile } from "fs/promises";
 import { join, sep } from "node:path";
+import { resolve } from "path";
 import { writeFile as writeFile$1, stat, readdir } from "node:fs/promises";
 import { format } from "prettier/standalone";
-const logWarn = (message) => {
-  console.warn("\x1B[33m%s\x1B[0m", `qwikInsight()[WARN]: ${message}`);
+const logWarn = (message, ...rest) => {
+  console.warn("\x1B[33m%s\x1B[0m", `qwikInsight()[WARN]: ${message}`, ...rest);
 };
 const log = (message) => {
   console.log("\x1B[35m%s\x1B[0m", `qwikInsight(): ${message}`);
 };
 async function qwikInsights(qwikInsightsOpts) {
-  const {
-    publicApiKey,
-    baseUrl = "https://qwik-insights.builder.io",
-    outDir = "dist"
-  } = qwikInsightsOpts;
+  const { publicApiKey, baseUrl = "https://insights.qwik.dev", outDir = "" } = qwikInsightsOpts;
   let isProd = false;
   const vitePlugin = {
     name: "vite-plugin-qwik-insights",
@@ -28,20 +25,18 @@ async function qwikInsights(qwikInsightsOpts) {
           const response = await fetch(`${baseUrl}/api/v1/${publicApiKey}/bundles/strategy/`);
           const strategy = await response.json();
           Object.assign(qManifest, strategy);
+          const path = resolve(viteConfig.root || ".", outDir);
+          const pathJson = join(path, "q-insights.json");
+          mkdirSync(path, { recursive: true });
+          log("Fetched latest Qwik Insight data into: " + pathJson);
+          await writeFile(pathJson, JSON.stringify(qManifest));
         } catch (e) {
-          logWarn("fail to fetch manifest from Insights DB");
+          logWarn("Failed to fetch manifest from Insights DB", e);
         }
-        const cwdRelativePath = join(viteConfig.root || ".", outDir);
-        const cwdRelativePathJson = join(cwdRelativePath, "q-insights.json");
-        if (!existsSync(join(process.cwd(), cwdRelativePath))) {
-          mkdirSync(join(process.cwd(), cwdRelativePath), { recursive: true });
-        }
-        log("Fetched latest Qwik Insight data into: " + cwdRelativePathJson);
-        await writeFile(join(process.cwd(), cwdRelativePathJson), JSON.stringify(qManifest));
       }
     },
     closeBundle: async () => {
-      const path = join(process.cwd(), outDir, "q-manifest.json");
+      const path = resolve(outDir, "q-manifest.json");
       if (isProd && existsSync(path)) {
         const qManifest = await readFile(path, "utf-8");
         try {
@@ -50,7 +45,7 @@ async function qwikInsights(qwikInsightsOpts) {
             body: qManifest
           });
         } catch (e) {
-          logWarn("fail to post manifest to Insights DB");
+          logWarn("Failed to post manifest to Insights DB", e);
         }
       }
     }
