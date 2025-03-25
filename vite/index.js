@@ -4,6 +4,11 @@ import { join, sep } from "node:path";
 import { resolve } from "path";
 import { writeFile as writeFile$1, stat, readdir } from "node:fs/promises";
 import { format } from "prettier/standalone";
+import estree from "prettier/plugins/estree";
+import typeScriptParser from "prettier/parser-typescript";
+import postCssParser from "prettier/parser-postcss";
+import htmlParser from "prettier/parser-html";
+import babelParser from "prettier/parser-babel";
 const logWarn = (message, ...rest) => {
   console.warn("\x1B[33m%s\x1B[0m", `qwikInsight()[WARN]: ${message}`, ...rest);
 };
@@ -62,11 +67,16 @@ async function prettify(template, ...substitutions) {
       parser: "typescript",
       plugins: [
         // To support running in browsers
-        require("prettier/plugins/estree"),
-        require("prettier/parser-typescript"),
-        require("prettier/parser-postcss"),
-        require("prettier/parser-html"),
-        require("prettier/parser-babel")
+        // require('prettier/plugins/estree'),
+        estree,
+        // require('prettier/parser-typescript'),
+        typeScriptParser,
+        // require('prettier/parser-postcss'),
+        postCssParser,
+        // require('prettier/parser-html'),
+        htmlParser,
+        // require('prettier/parser-babel'),
+        babelParser
       ],
       htmlWhitespaceSensitivity: "ignore"
     });
