@@ -6,6 +6,11 @@ const node_path = require("node:path");
 const path = require("path");
 const promises$1 = require("node:fs/promises");
 const standalone = require("prettier/standalone");
+const estree = require("prettier/plugins/estree");
+const typeScriptParser = require("prettier/parser-typescript");
+const postCssParser = require("prettier/parser-postcss");
+const htmlParser = require("prettier/parser-html");
+const babelParser = require("prettier/parser-babel");
 const logWarn = (message, ...rest) => {
   console.warn("\x1B[33m%s\x1B[0m", `qwikInsight()[WARN]: ${message}`, ...rest);
 };
@@ -64,11 +69,16 @@ async function prettify(template, ...substitutions) {
       parser: "typescript",
       plugins: [
         // To support running in browsers
-        require("prettier/plugins/estree"),
-        require("prettier/parser-typescript"),
-        require("prettier/parser-postcss"),
-        require("prettier/parser-html"),
-        require("prettier/parser-babel")
+        // require('prettier/plugins/estree'),
+        estree,
+        // require('prettier/parser-typescript'),
+        typeScriptParser,
+        // require('prettier/parser-postcss'),
+        postCssParser,
+        // require('prettier/parser-html'),
+        htmlParser,
+        // require('prettier/parser-babel'),
+        babelParser
       ],
       htmlWhitespaceSensitivity: "ignore"
     });
