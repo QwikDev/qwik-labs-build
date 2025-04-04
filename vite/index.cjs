@@ -1,10 +1,8 @@
 "use strict";
 Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
-const fs = require("fs");
-const promises = require("fs/promises");
+const node_fs = require("node:fs");
+const promises = require("node:fs/promises");
 const node_path = require("node:path");
-const path = require("path");
-const promises$1 = require("node:fs/promises");
 const standalone = require("prettier/standalone");
 const estree = require("prettier/plugins/estree");
 const typeScriptParser = require("prettier/parser-typescript");
@@ -20,32 +18,85 @@ const log = (message) => {
 async function qwikInsights(qwikInsightsOpts) {
   const { publicApiKey, baseUrl = "https://insights.qwik.dev", outDir = "" } = qwikInsightsOpts;
   let isProd = false;
+  let jsonDir;
+  let jsonFile;
+  let data = null;
+  let qwikVitePlugin = null;
+  async function loadQwikInsights() {
+    if (data) {
+      return data;
+    }
+    if (node_fs.existsSync(jsonFile)) {
+      log("Reading Qwik Insight data from: " + jsonFile);
+      return data = JSON.parse(await promises.readFile(jsonFile, "utf-8"));
+    }
+    return null;
+  }
   const vitePlugin = {
     name: "vite-plugin-qwik-insights",
     enforce: "pre",
     apply: "build",
     async config(viteConfig) {
+      jsonDir = node_path.resolve(viteConfig.root || ".", outDir);
+      jsonFile = node_path.join(jsonDir, "q-insights.json");
       isProd = viteConfig.mode !== "ssr";
-      if (isProd) {
-        const qManifest = { type: "smart" };
-        try {
-          const response = await fetch(`${baseUrl}/api/v1/${publicApiKey}/bundles/strategy/`);
-          const strategy = await response.json();
-          Object.assign(qManifest, strategy);
-          const path$1 = path.resolve(viteConfig.root || ".", outDir);
-          const pathJson = node_path.join(path$1, "q-insights.json");
-          fs.mkdirSync(path$1, { recursive: true });
-          log("Fetched latest Qwik Insight data into: " + pathJson);
-          await promises.writeFile(pathJson, JSON.stringify(qManifest));
-        } catch (e) {
-          logWarn("Failed to fetch manifest from Insights DB", e);
+    },
+    configResolved: {
+      // we want to register the bundle graph adder last so we overwrite existing routes
+      order: "post",
+      async handler(config) {
+        qwikVitePlugin = config.plugins.find(
+          (p) => p.name === "vite-plugin-qwik"
+        );
+        if (!qwikVitePlugin) {
+          throw new Error("Missing vite-plugin-qwik");
+        }
+        const opts = qwikVitePlugin.api.getOptions();
+        if (isProd) {
+          try {
+            const qManifest = { manual: {}, prefetch: [] };
+            const response = await fetch(`${baseUrl}/api/v1/${publicApiKey}/bundles/strategy/`);
+            const strategy = await response.json();
+            Object.assign(qManifest, strategy);
+            data = qManifest;
+            node_fs.mkdirSync(jsonDir, { recursive: true });
+            log("Fetched latest Qwik Insight data into: " + jsonFile);
+            await promises.writeFile(jsonFile, JSON.stringify(qManifest));
+          } catch (e) {
+            logWarn("Failed to fetch manifest from Insights DB", e);
+            await loadQwikInsights();
+          }
+        } else {
+          await loadQwikInsights();
+        }
+        if (data) {
+          opts.entryStrategy.manual = {
+            ...data.manual,
+            ...opts.entryStrategy.manual
+          };
+          qwikVitePlugin.api.registerBundleGraphAdder((manifest) => {
+            const result = {};
+            for (const item of data?.prefetch || []) {
+              if (item.symbols) {
+                let route = item.route;
+                if (route.startsWith("/")) {
+                  route = route.slice(1);
+                }
+                if (!route.endsWith("/")) {
+                  route += "/";
+                }
+                result[route] = { ...manifest.bundles[route], imports: item.symbols };
+              }
+            }
+            return result;
+          });
         }
       }
     },
     closeBundle: async () => {
-      const path$1 = path.resolve(outDir, "q-manifest.json");
-      if (isProd && fs.existsSync(path$1)) {
-        const qManifest = await promises.readFile(path$1, "utf-8");
+      const path = node_path.resolve(outDir, "q-manifest.json");
+      if (isProd && node_fs.existsSync(path)) {
+        const qManifest = await promises.readFile(path, "utf-8");
         try {
           await fetch(`${baseUrl}/api/v1/${publicApiKey}/post/manifest`, {
             method: "post",
@@ -133,18 +184,18 @@ export function AppLink(props: AppLinkProps & QwikIntrinsicElements['a']) {
   const fileExists = await exists(file);
   console.log("File exists", file, fileExists);
   if (!fileExists) {
-    promises$1.writeFile(file, CONFIG_FILE);
+    promises.writeFile(file, CONFIG_FILE);
   }
 }
 async function exists(file) {
   try {
-    return (await promises$1.stat(file)).isFile();
+    return (await promises.stat(file)).isFile();
   } catch (e) {
     return false;
   }
 }
 async function generateSrcRoutesGen(srcDir, routes) {
-  await promises$1.writeFile(
+  await promises.writeFile(
     node_path.join(srcDir, "routes.gen.d.ts"),
     await prettify`
 ${GENERATED_HEADER}
@@ -210,7 +261,7 @@ async function regenerateRoutes(srcDir, routesDir) {
 }
 async function assertDirectoryExists(directoryPath) {
   try {
-    const stats = await promises$1.stat(directoryPath);
+    const stats = await promises.stat(directoryPath);
     if (!stats.isDirectory()) {
       throw new Error(`${directoryPath} is not a directory.`);
     }
@@ -227,10 +278,10 @@ function getRouteDirectory(id) {
   return null;
 }
 async function collectRoutes(base, directoryPath, routes) {
-  const files = await promises$1.readdir(directoryPath);
+  const files = await promises.readdir(directoryPath);
   for (let i = 0; i < files.length; i++) {
     const filePath = node_path.join(directoryPath, files[i]);
-    const fileStat = await promises$1.stat(filePath);
+    const fileStat = await promises.stat(filePath);
     let route;
     if (fileStat.isDirectory()) {
       await collectRoutes(base, filePath, routes);
