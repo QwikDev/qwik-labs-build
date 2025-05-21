@@ -1,8 +1,6 @@
-import { mkdirSync, existsSync } from "fs";
-import { writeFile, readFile } from "fs/promises";
-import { join, sep } from "node:path";
-import { resolve } from "path";
-import { writeFile as writeFile$1, stat, readdir } from "node:fs/promises";
+import { existsSync, mkdirSync } from "node:fs";
+import { readFile, writeFile, stat, readdir } from "node:fs/promises";
+import { resolve, join, sep } from "node:path";
 import { format } from "prettier/standalone";
 import estree from "prettier/plugins/estree";
 import typeScriptParser from "prettier/parser-typescript";
@@ -18,25 +16,78 @@ const log = (message) => {
 async function qwikInsights(qwikInsightsOpts) {
   const { publicApiKey, baseUrl = "https://insights.qwik.dev", outDir = "" } = qwikInsightsOpts;
   let isProd = false;
+  let jsonDir;
+  let jsonFile;
+  let data = null;
+  let qwikVitePlugin = null;
+  async function loadQwikInsights() {
+    if (data) {
+      return data;
+    }
+    if (existsSync(jsonFile)) {
+      log("Reading Qwik Insight data from: " + jsonFile);
+      return data = JSON.parse(await readFile(jsonFile, "utf-8"));
+    }
+    return null;
+  }
   const vitePlugin = {
     name: "vite-plugin-qwik-insights",
     enforce: "pre",
     apply: "build",
     async config(viteConfig) {
+      jsonDir = resolve(viteConfig.root || ".", outDir);
+      jsonFile = join(jsonDir, "q-insights.json");
       isProd = viteConfig.mode !== "ssr";
-      if (isProd) {
-        const qManifest = { type: "smart" };
-        try {
-          const response = await fetch(`${baseUrl}/api/v1/${publicApiKey}/bundles/strategy/`);
-          const strategy = await response.json();
-          Object.assign(qManifest, strategy);
-          const path = resolve(viteConfig.root || ".", outDir);
-          const pathJson = join(path, "q-insights.json");
-          mkdirSync(path, { recursive: true });
-          log("Fetched latest Qwik Insight data into: " + pathJson);
-          await writeFile(pathJson, JSON.stringify(qManifest));
-        } catch (e) {
-          logWarn("Failed to fetch manifest from Insights DB", e);
+    },
+    configResolved: {
+      // we want to register the bundle graph adder last so we overwrite existing routes
+      order: "post",
+      async handler(config) {
+        qwikVitePlugin = config.plugins.find(
+          (p) => p.name === "vite-plugin-qwik"
+        );
+        if (!qwikVitePlugin) {
+          throw new Error("Missing vite-plugin-qwik");
+        }
+        const opts = qwikVitePlugin.api.getOptions();
+        if (isProd) {
+          try {
+            const qManifest = { manual: {}, prefetch: [] };
+            const response = await fetch(`${baseUrl}/api/v1/${publicApiKey}/bundles/strategy/`);
+            const strategy = await response.json();
+            Object.assign(qManifest, strategy);
+            data = qManifest;
+            mkdirSync(jsonDir, { recursive: true });
+            log("Fetched latest Qwik Insight data into: " + jsonFile);
+            await writeFile(jsonFile, JSON.stringify(qManifest));
+          } catch (e) {
+            logWarn("Failed to fetch manifest from Insights DB", e);
+            await loadQwikInsights();
+          }
+        } else {
+          await loadQwikInsights();
+        }
+        if (data) {
+          opts.entryStrategy.manual = {
+            ...data.manual,
+            ...opts.entryStrategy.manual
+          };
+          qwikVitePlugin.api.registerBundleGraphAdder((manifest) => {
+            const result = {};
+            for (const item of data?.prefetch || []) {
+              if (item.symbols) {
+                let route = item.route;
+                if (route.startsWith("/")) {
+                  route = route.slice(1);
+                }
+                if (!route.endsWith("/")) {
+                  route += "/";
+                }
+                result[route] = { ...manifest.bundles[route], imports: item.symbols };
+              }
+            }
+            return result;
+          });
         }
       }
     },
@@ -131,7 +182,7 @@ export function AppLink(props: AppLinkProps & QwikIntrinsicElements['a']) {
   const fileExists = await exists(file);
   console.log("File exists", file, fileExists);
   if (!fileExists) {
-    writeFile$1(file, CONFIG_FILE);
+    writeFile(file, CONFIG_FILE);
   }
 }
 async function exists(file) {
@@ -142,7 +193,7 @@ async function exists(file) {
   }
 }
 async function generateSrcRoutesGen(srcDir, routes) {
-  await writeFile$1(
+  await writeFile(
     join(srcDir, "routes.gen.d.ts"),
     await prettify`
 ${GENERATED_HEADER}
