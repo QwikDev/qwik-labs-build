@@ -1,1 +1,1 @@
-export declare const devtoolsJsonSRC: string;
+export { default as devtoolsJsonSRC } from './json?compiled-string';
