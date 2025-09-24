@@ -3,18 +3,18 @@
   "description": "Qwik Labs - Where you can try the latest Qwik ideas.",
   "version": "0.0.1",
   "devDependencies": {
-    "@builder.io/qwik": "1.16.1",
+    "@builder.io/qwik": "1.16.2",
     "@eslint/js": "9.32.0",
     "@types/node": "20.19.0",
     "eslint": "9.32.0",
-    "eslint-plugin-qwik": "1.16.1",
+    "eslint-plugin-qwik": "1.16.2",
     "globals": "16.3.0",
     "np": "10.2.0",
     "prettier": "3.6.2",
     "typescript": "5.4.5",
     "typescript-eslint": "8.38.0",
     "undici": "*",
-    "vite": "7.1.4",
+    "vite": "7.1.5",
     "zod": "3.25.48"
   },
   "engines": {
@@ -58,7 +58,7 @@
     "start": "vite --open --mode ssr",
     "test.unit": "vitest"
   },
+  "sideEffects": false,
   "type": "module",
-  "types": "./lib/index.d.ts",
-  "sideEffects": false
+  "types": "./lib/index.d.ts"
 }
