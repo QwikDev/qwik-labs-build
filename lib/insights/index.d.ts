@@ -1,5 +1,4 @@
-import { z } from 'zod';
-
+import * as z from 'zod';
 export interface InsightsPayload {
     /** Qwik version */
     qVersion: string;
